@@ -144,15 +144,16 @@ class TATS(Strategy):
             for n in range(lsr, ppr,  5):
                 self.s_l[n] = 0
             for n in range(ppr, hrr,  5):
-                self.r_l[n] = 0                
+                self.r_l[n] = 0
+        ###### start #######
         log.debug ("*******%d:(%s) zone_s: %s zone_r: %s vwap: %f atr: %f cur_close: %f"%(cdl.time,
             dt.time(), self.s_l, self.r_l, vwap, atr, cur_close))
         za = ""        
         if dir == "up":
-            #see if we are near any resistance zones or crossed
+            #see if we are near any pivot-points resistance zones or crossed
             try:
                 i = 0
-                while True:
+                while i < len( self.r_l):
                     r, w = self.r_l.peekitem(i)
                     #czse 1. moving up from resistance
                     if cur_close >= r + (w + self.atr_mx)*atr:
@@ -164,7 +165,7 @@ class TATS(Strategy):
                             #cases where we broke one res and in the zone of other, don't buy (conservative buy)
                             za = "buy"
                             self.res_try_break = False
-    #                     break #could we break multiple resistance in one candle? yes!
+                        # break #could we break multiple resistance in one candle? yes!
                     elif cur_close >= r - ( self.atr_mx)*atr:
                         #case 2: trying to break resistance. within the range now.
                         log.debug ("TATS - trying to break resistance %f: %d cur_close: %f"%(r, w, cur_close))
@@ -183,12 +184,11 @@ class TATS(Strategy):
 
             #case3: check if we are in vwap resistance zone
             if cur_close >= vwap + self.atr_mx*atr:
-                if self.vwap_try_break == True:
-                    #broke VWAP resistance, new break
-                    log.debug ("TATS - broke vwap(%f) resistance BUY "%(vwap))                    
-                    if za == "":
-                        self.vwap_try_break = False
-                        za = "buy"
+                #broke VWAP resistance, new break
+                log.debug ("TATS - broke vwap(%f) resistance BUY "%(vwap))                    
+                if za == "":
+                    self.vwap_try_break = False
+                    za = "buy"
             elif cur_close >= vwap - self.atr_mx*atr:
                 log.debug ("TATS - trying to break VWAP resistance %f"%(vwap))                
                 self.vwap_try_break = True
